@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PlantsService } from './plants.service';
 import { CreatePlantDto } from './dto/create-plant.dto';
 import { UpdatePlantDto } from './dto/update-plant.dto';
@@ -12,10 +12,15 @@ export class PlantsController {
     return this.plantsService.create(createPlantDto);
   }
 
-  @Get()
-  findAll() {
-    return this.plantsService.findAll();
-  }
+@Get()
+findAll(
+  @Query('search') search?: string,
+  @Query('skip') skip?: number,
+  @Query('take') take?: number,
+) {
+  // Passiamo l'oggetto query richiesto dal service
+  return this.plantsService.findAll({ search, skip, take });
+}
 
   @Get(':id')
   findOne(@Param('id') id: string) {

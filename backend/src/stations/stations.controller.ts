@@ -13,10 +13,15 @@ export class StationsController {
     return this.stationsService.create(createStationDto);
   }
 
-  @Get()
-  findAll(@Query('plantId') plantId?: string) {
-    return this.stationsService.findAll(plantId);
-  }
+@Get()
+findAll(
+  @Query('plantId') plantId?: string, // Recuperiamo l'eventuale filtro per pianta
+  @Query('search') search?: string,
+  @Query('skip') skip?: number,
+  @Query('take') take?: number,
+) {
+  return this.stationsService.findAll({ plantId, search, skip, take });
+}
 
   @Get(':id')
   findOne(@Param('id') id: string) {

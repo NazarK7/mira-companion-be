@@ -18,12 +18,38 @@ export class PlantsService {
     });
   }
 
-  async findAll() {
-    return this.prisma.plant.findMany({
-      include: { _count: { select: { stations: true } } },
-      orderBy: { name: 'asc' },
-    });
+async findAll(query: { search?: string; skip?: number; take?: number }) {
+  const { search, skip, take } = query;
+  const where: any = {};
+
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { location: { contains: search, mode: 'insensitive' } },
+    ];
   }
+
+  const [items, total] = await Promise.all([
+    this.prisma.plant.findMany({
+      where,
+      skip: skip ? Number(skip) : undefined,
+      take: take ? Number(take) : undefined,
+      include: { customer: true, _count: { select: { stations: true } } },
+      orderBy: { updatedAt: 'desc' },
+    }),
+    this.prisma.plant.count({ where })
+  ]);
+
+  return {
+    items: items.map(p => ({
+      ...p,
+      customerName: p.customer.name,
+      customerSlug: p.customer.slug,
+      stationsCount: p._count.stations
+    })),
+    total
+  };
+}
 
   async findOne(id: string) {
     const plant = await this.prisma.plant.findUnique({
