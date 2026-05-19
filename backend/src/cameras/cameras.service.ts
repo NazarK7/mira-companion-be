@@ -6,7 +6,7 @@ import { UpdateCameraDto } from './dto/update-camera.dto';
 
 @Injectable()
 export class CamerasService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(createCameraDto: CreateCameraDto) {
     return this.prisma.camera.create({
@@ -14,24 +14,57 @@ export class CamerasService {
     });
   }
 
-  async findAll(stationId?: string) {
-    const where = stationId ? { stationId } : {};
-    return this.prisma.camera.findMany({
-      where,
-      select: {
-        id: true,
-        stationId: true,
-        name: true,
-        type: true,
-        cameraModel: true,
-        ipAddress: true,
-        status: true, // Sbloccato
-        _count: {
-          select: { jobs: true },
+  async findAll(query: { stationId?: string; search?: string; skip?: number; take?: number }) {
+    const { stationId, search, skip, take } = query;
+
+    // Costruiamo il filtro di ricerca dinamico
+    const where: any = {};
+    if (stationId) where.stationId = stationId;
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { ipAddress: { contains: search, mode: 'insensitive' } },
+        { cameraModel: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Eseguiamo la query con paginazione e ordinamento per aggiornamento
+    const [items, total] = await Promise.all([
+      this.prisma.camera.findMany({
+        where,
+        skip: skip ? Number(skip) : undefined,
+        take: take ? Number(take) : undefined,
+        include: {
+          station: {
+            include: {
+              plant: { include: { customer: true } }
+            }
+          },
+          _count: { select: { jobs: true } }
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { updatedAt: 'desc' }, // Sempre le più recenti per prime
+      }),
+      this.prisma.camera.count({ where }) // Ci serve il totale per il paginator del front-end
+    ]);
+
+    // Appiattiamo i dati per il front-end (REST Piatto)
+    const flattened = items.map(cam => ({
+      id: cam.id,
+      name: cam.name,
+      type: cam.type,
+      cameraModel: cam.cameraModel,
+      ipAddress: cam.ipAddress,
+      status: cam.status,
+      customerSlug: cam.station.plant.customer.slug,
+      customerName: cam.station.plant.customer.name,
+      plantId: cam.station.plant.id,
+      plantName: cam.station.plant.name,
+      stationId: cam.stationId,
+      stationName: cam.station.name,
+      jobsCount: cam._count.jobs
+    }));
+
+    return { items: flattened, total };
   }
 
   async findOne(id: string) {
@@ -43,7 +76,7 @@ export class CamerasService {
             id: true,
             name: true,
             visionToolSlot: true, // Sbloccato
-            updatedAt: true, 
+            updatedAt: true,
           },
           orderBy: { updatedAt: 'desc' },
         },
@@ -52,9 +85,9 @@ export class CamerasService {
             id: true,
             mode: true, // Sbloccato
             isCurrent: true, // Sbloccato
-            createdAt: true, 
+            createdAt: true,
           },
-          orderBy: { createdAt: 'desc' }, 
+          orderBy: { createdAt: 'desc' },
         },
         _count: {
           select: {

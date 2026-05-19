@@ -1,13 +1,13 @@
 // backend/src/cameras/cameras.controller.ts
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Patch, 
-  Param, 
-  Delete, 
-  Query 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query
 } from '@nestjs/common';
 import { CamerasService } from './cameras.service';
 import { CreateCameraDto } from './dto/create-camera.dto';
@@ -15,7 +15,7 @@ import { UpdateCameraDto } from './dto/update-camera.dto';
 
 @Controller('cameras')
 export class CamerasController {
-  constructor(private readonly camerasService: CamerasService) {}
+  constructor(private readonly camerasService: CamerasService) { }
 
   @Post()
   create(@Body() createCameraDto: CreateCameraDto) {
@@ -23,8 +23,13 @@ export class CamerasController {
   }
 
   @Get()
-  findAll(@Query('stationId') stationId?: string) {
-    return this.camerasService.findAll(stationId);
+  findAll(
+    @Query('stationId') stationId?: string,
+    @Query('search') search?: string,
+    @Query('skip') skip?: number,
+    @Query('take') take?: number,
+  ) {
+    return this.camerasService.findAll({ stationId, search, skip, take });
   }
 
   @Get(':id')
@@ -35,7 +40,7 @@ export class CamerasController {
 
   @Patch(':id')
   update(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body() updateCameraDto: UpdateCameraDto
   ) {
     return this.camerasService.update(id, updateCameraDto);
