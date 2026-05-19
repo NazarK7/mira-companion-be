@@ -1,0 +1,295 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CameraType {
+  COGNEX_INSIGHT
+  COGNEX_DATAMAN
+  MIRA_3D
+}
+
+enum RobotControllerType {
+  ABB
+  COMAU
+  FANUC
+  KUKA
+}
+
+enum StationStatus {
+  PLANNING
+  PRODUCTION
+  MAINTENANCE
+  ARCHIVED
+}
+
+enum CameraStatus {
+  PLANNING
+  CALIBRATING
+  JOB_CREATION
+  PRODUCTION
+  MAINTENANCE
+  ARCHIVED
+}
+
+enum ContactCategory {
+  PLANT_REFERENT
+  IT_REFERENT
+  ROBOTICS_REFERENT
+  COMAU_REFERENT
+  OTHER
+}
+
+enum MaintenanceCategory {
+  INSTALLATION
+  CALIBRATION
+  JOB_UPDATE
+  LICENSE_RENEWAL
+  HARDWARE_SWAP
+  FIRMWARE_UPDATE
+  TROUBLESHOOTING
+  OTHER
+}
+
+enum CalibrationMode {
+  PRODUCTION_20
+  LAB_5
+  EXTENDED_30
+  CUSTOM
+}
+
+model Customer {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug      String   @unique
+  name      String
+  shortName String?
+  notes     String?
+
+  plants    Plant[]
+  contacts  Contact[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Plant {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customerId String   @db.Uuid
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  name       String
+  location   String?
+  address    String?
+  notes      String?
+
+  stations   Station[]
+  contacts   Contact[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Station {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  plantId           String        @db.Uuid
+  plant             Plant         @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  
+  name              String
+  code              String?
+  line              String?
+  description       String?
+  installDate       DateTime?
+  recoveryProcedure String?
+  notes             String?
+  status            StationStatus?
+  tags              String[]
+
+  cameras           Camera[]
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model Camera {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  stationId       String               @db.Uuid
+  station         Station              @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  
+  name            String
+  type            CameraType
+  
+  cameraModel     String?
+  lensFocalMm     Float?
+  firmware        String?
+  ipAddress       String?
+  serialNumber    String?
+  macAddress      String?
+  
+  controllerType RobotControllerType?
+
+  plcNotes        String?
+  notes           String?
+  tags            String[]
+  status          CameraStatus?
+
+  jobs              Job[]
+  halconLicenses    HalconLicenseRecord[]
+  robotBackups      RobotBackupRecord[]
+  maintenanceEvents MaintenanceEvent[]
+  calibrations      Calibration[]
+
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+model Job {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cameraId       String      @db.Uuid
+  camera         Camera      @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  
+  name           String
+  description    String?
+  visionToolSlot Int?
+
+  backups        JobBackup[]
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model JobBackup {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  jobId           String         @db.Uuid
+  job             Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  
+  filePath        String?
+  fileName        String?
+  fileSize        BigInt?
+  masterImagePath String?
+  notes           String?
+  createdBy       String?
+
+  testImages      JobTestImage[]
+
+  createdAt       DateTime       @default(now())
+}
+
+model JobTestImage {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  backupId   String    @db.Uuid
+  backup     JobBackup @relation(fields: [backupId], references: [id], onDelete: Cascade)
+  
+  filename   String
+  filePath   String?
+  fileSize   BigInt?
+  capturedAt DateTime?
+  notes      String?
+
+  createdAt  DateTime  @default(now())
+}
+
+model HalconLicenseRecord {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cameraId   String    @db.Uuid
+  camera     Camera    @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  
+  version    String?
+  expiryDate DateTime?
+  filePath   String?
+  fileName   String?
+  fileSize   BigInt?
+  notes      String?
+
+  createdAt  DateTime  @default(now())
+}
+
+model RobotBackupRecord {
+  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cameraId          String               @db.Uuid
+  camera            Camera               @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  
+  filePath          String?
+  fileName          String?
+  fileSize          BigInt?
+  robotController   RobotControllerType?
+  controllerVersion String?
+  notes             String?
+
+  createdAt         DateTime             @default(now())
+}
+
+model MaintenanceEvent {
+  id          String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cameraId    String              @db.Uuid
+  camera      Camera              @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  
+  occurredAt  DateTime
+  category    MaintenanceCategory
+  title       String
+  description String?
+  performedBy String?
+
+  createdAt   DateTime            @default(now())
+}
+
+model Calibration {
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cameraId          String          @db.Uuid
+  camera            Camera          @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  
+  mode              CalibrationMode
+  totalPosesPlanned Int
+  anchorPose        Json            
+  poses             Json            
+  plate             Json            
+  result            Json?           
+  isCurrent         Boolean         @default(false)
+  notes             String?
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model Contact {
+  id         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  role       String?
+  email      String?
+  phone      String?
+  category   ContactCategory?
+  notes      String?
+
+  customerId String?         @db.Uuid
+  customer   Customer?       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  plantId    String?         @db.Uuid
+  plant      Plant?          @relation(fields: [plantId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+model AuditLog {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  timestamp     DateTime @default(now())
+  action        String   
+  entityType    String   
+  entityId      String   @db.Uuid
+  entityPath    String
+  changeSummary String
+  diffJson      Json?
+}
+
+model AppSetting {
+  id                  String   @id @default("singleton") 
+  uiLanguage          String   @default("it")
+  projectsRootPath    String?
+  theme               String   @default("auto")
+  preferredPoseFormat Json     
+  encryptionEnabled   Boolean  @default(false)
+
+  updatedAt           DateTime @updatedAt
+}

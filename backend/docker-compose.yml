@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mira_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mira
+      POSTGRES_PASSWORD: mira_dev_password
+      POSTGRES_DB: mira_companion
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - mira_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mira -d mira_companion"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mira_pg_data:

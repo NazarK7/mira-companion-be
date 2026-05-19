@@ -1,0 +1,40 @@
+# --- FONDAMENTALI (Ignora ovunque nel progetto) ---
+node_modules/
+dist/
+build/
+.angular/
+.cache/
+
+# --- AMBIENTE E SICUREZZA (Critico!) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- LOG E DIAGNOSTICA ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# --- DATA & DB (Prisma & Postgres) ---
+# Ignoriamo i dati locali del DB ma teniamo le migrazioni
+/data/postgres/
+/backend/prisma/generated-client/
+
+# --- SISTEMA OPERATIVO E IDE ---
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# --- SPECIFICI PER MIRA COMPANION ---
+# Se hai una cartella per i backup pesanti locale, ignorala
+/data/blobs/

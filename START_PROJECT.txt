@@ -1,0 +1,5 @@
+cd /home/comau/Projects/mira-companion-ws
+docker compose up -d postgres
+
+cd /home/comau/Projects/mira-companion-ws/backend
+npm run start:dev
