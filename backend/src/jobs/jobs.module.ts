@@ -9,5 +9,6 @@ import { DashboardModule } from '../dashboard/dashboard.module';
   imports: [StorageModule, DashboardModule], // Necessario per this.storage.deleteFile()
   controllers: [JobsController],
   providers: [JobsService],
+  exports: [JobsService],
 })
 export class JobsModule {}

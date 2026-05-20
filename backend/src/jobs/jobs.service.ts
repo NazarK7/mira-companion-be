@@ -1,5 +1,5 @@
 // backend/src/jobs/jobs.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -18,6 +18,30 @@ export class JobsService {
   // --- GESTIONE JOB LOGICO ---
 
   async createJob(createDto: CreateJobDto) {
+    // 1. Controllo Slot ID (visionToolSlot)
+    if (createDto.visionToolSlot) {
+      const existingSlot = await this.prisma.job.findFirst({
+        where: {
+          cameraId: createDto.cameraId,
+          visionToolSlot: createDto.visionToolSlot
+        }
+      });
+      if (existingSlot) {
+        throw new ConflictException(`Lo Slot VT${createDto.visionToolSlot} è già occupato dal Job: "${existingSlot.name}"`);
+      }
+    }
+
+    // 2. Controllo Nome Unico
+    const existingName = await this.prisma.job.findFirst({
+      where: {
+        cameraId: createDto.cameraId,
+        name: createDto.name
+      }
+    });
+    if (existingName) {
+      throw new ConflictException(`Esiste già un Job con il nome "${createDto.name}" per questa camera`);
+    }
+
     return this.prisma.job.create({ data: createDto });
   }
 

@@ -8,7 +8,6 @@ import { RobotBackupsModule } from './robot-backups/robot-backups.module';
 import { StorageModule } from './storage/storage.module';
 import { JobsModule } from './jobs/jobs.module';
 import { CalibrationsModule } from './calibrations/calibrations.module';
-import { HalconLicensesModule } from './halcon-licenses/halcon-licenses.module';
 import { MaintenanceEventsModule } from './maintenance-events/maintenance-events.module';
 
 @Module({
@@ -17,7 +16,7 @@ import { MaintenanceEventsModule } from './maintenance-events/maintenance-events
     PrismaModule, 
     CustomersModule, 
     PlantsModule, 
-    StationsModule, CamerasModule, RobotBackupsModule, JobsModule, CalibrationsModule, HalconLicensesModule, MaintenanceEventsModule
+    StationsModule, CamerasModule, RobotBackupsModule, JobsModule, CalibrationsModule, MaintenanceEventsModule
   ],
 })
 export class AppModule {}

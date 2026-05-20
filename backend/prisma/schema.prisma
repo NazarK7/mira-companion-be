@@ -1,3 +1,5 @@
+// backend/prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -135,14 +137,29 @@ model Camera {
   tags            String[]
   status          CameraStatus?
 
+  // --- ASSET MIRA_3D (Single Instance) ---
+  mira3dBackupPath    String?
+  mira3dBackupName    String?
+  mira3dBackupSize    BigInt?
+  
+  halconLicensePath   String?
+  halconLicenseName   String?
+  halconLicenseSize   BigInt?
+  
+  restartOnCrashPath  String?
+  restartOnCrashName  String?
+  restartOnCrashSize  BigInt?
+
+  // --- RELAZIONI ---
   jobs              Job[]
-  halconLicenses    HalconLicenseRecord[]
   robotBackups      RobotBackupRecord[]
   maintenanceEvents MaintenanceEvent[]
   calibrations      Calibration[]
 
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
+
+  @@unique([stationId, name])
 }
 
 model Job {
@@ -158,6 +175,9 @@ model Job {
 
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
+
+  @@unique([cameraId, visionToolSlot])
+  @@unique([cameraId, name])
 }
 
 model JobBackup {
@@ -191,21 +211,6 @@ model JobTestImage {
   createdAt  DateTime  @default(now())
 }
 
-model HalconLicenseRecord {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  cameraId   String    @db.Uuid
-  camera     Camera    @relation(fields: [cameraId], references: [id], onDelete: Cascade)
-  
-  version    String?
-  expiryDate DateTime?
-  filePath   String?
-  fileName   String?
-  fileSize   BigInt?
-  notes      String?
-
-  createdAt  DateTime  @default(now())
-}
-
 model RobotBackupRecord {
   id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   cameraId          String               @db.Uuid
@@ -225,7 +230,7 @@ model MaintenanceEvent {
   id          String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   cameraId    String              @db.Uuid
   camera      Camera              @relation(fields: [cameraId], references: [id], onDelete: Cascade)
-  
+ 
   occurredAt  DateTime
   category    MaintenanceCategory
   title       String
@@ -245,7 +250,7 @@ model Calibration {
   anchorPose        Json            
   poses             Json            
   plate             Json            
-  result            Json?           
+  result            Json?
   isCurrent         Boolean         @default(false)
   notes             String?
 

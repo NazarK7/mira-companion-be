@@ -70,7 +70,7 @@ export class StationsService {
             cameraModel: true,
             ipAddress: true,
             status: true,
-            _count: { select: { jobs: true, halconLicenses: true, maintenanceEvents: true } }
+            _count: { select: { jobs: true, maintenanceEvents: true } }
           }
         }
       },
