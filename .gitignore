@@ -36,5 +36,5 @@ pids
 !.vscode/extensions.json
 
 # --- SPECIFICI PER MIRA COMPANION ---
-# Se hai una cartella per i backup pesanti locale, ignorala
-/data/blobs/
+backend/data/blobs/
+/backend/data/blobs/

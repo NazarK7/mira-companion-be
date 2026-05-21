@@ -1,7 +1,7 @@
 // backend/src/storage/storage.service.ts
 import { Injectable, Logger } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 @Injectable()
 export class StorageService {
@@ -35,8 +35,8 @@ export class StorageService {
       const stats = await fs.promises.stat(absolutePath);
       return stats.size;
     } catch (error) {
-      this.logger.warn(`File not found for size check: ${absolutePath}`);
-      return 0;
+      this.logger.error(`Failed to get file size for: ${absolutePath}`, error);
+      throw error;
     }
   }
 }

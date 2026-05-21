@@ -1,7 +1,7 @@
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 
 // Il path di base: process.cwd() nel backend punterà alla root del progetto NestJS.
 // La cartella data/blobs sarà la stessa montata via Docker volume nel deploy.
