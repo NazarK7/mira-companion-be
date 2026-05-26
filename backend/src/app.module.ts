@@ -9,9 +9,15 @@ import { StorageModule } from './storage/storage.module';
 import { JobsModule } from './jobs/jobs.module';
 import { CalibrationsModule } from './calibrations/calibrations.module';
 import { MaintenanceEventsModule } from './maintenance-events/maintenance-events.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
+    MulterModule.register({
+      limits: {
+        fileSize: 3 * 1024 * 1024 * 1024, 
+      },
+    }),
     StorageModule,
     PrismaModule, 
     CustomersModule, 

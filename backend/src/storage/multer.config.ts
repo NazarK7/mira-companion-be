@@ -24,6 +24,6 @@ export const multerDiskConfig = {
     },
   }),
   limits: {
-    fileSize: 1024 * 1024 * 1024, // Limite hard: 1GB (necessario per i backup MIRA_3D)
+    fileSize: 4 * 1024 * 1024 * 1024, // Limite hard: 1GB (necessario per i backup MIRA_3D)
   },
 };

@@ -23,7 +23,7 @@ import { multerDiskConfig } from '../storage/multer.config';
 
 @Controller('robot-backups')
 export class RobotBackupsController {
-  constructor(private readonly robotBackupsService: RobotBackupsService) {}
+  constructor(private readonly robotBackupsService: RobotBackupsService) { }
 
   @Post()
   @UseInterceptors(FileInterceptor('file', multerDiskConfig))
@@ -32,7 +32,7 @@ export class RobotBackupsController {
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 1024 }),
+          new MaxFileSizeValidator({ maxSize: 3 * 1024 * 1024 * 1024 }),
         ],
         fileIsRequired: true,
       }),

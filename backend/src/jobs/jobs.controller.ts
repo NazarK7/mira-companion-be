@@ -1,6 +1,6 @@
 // backend/src/jobs/jobs.controller.ts
 import {
- Patch,  Controller, Get, Post, Body, Param, Delete, Query, UseInterceptors,
+  Patch, Controller, Get, Post, Body, Param, Delete, Query, UseInterceptors,
   UploadedFile, ParseFilePipe, MaxFileSizeValidator, Res, NotFoundException,
   Logger
 } from '@nestjs/common';
@@ -43,7 +43,7 @@ export class JobsController {
     @Body() dto: CreateJobBackupDto,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 1024 })],
+        validators: [new MaxFileSizeValidator({ maxSize: 3 * 1024 * 1024 * 1024 })],
         fileIsRequired: true,
       }),
     ) file: Express.Multer.File,
@@ -51,9 +51,9 @@ export class JobsController {
     return this.jobsService.addBackup(jobId, dto, file);
   }
 
-@Get('backups/:backupId/download')
+  @Get('backups/:backupId/download')
   async downloadBackup(
-    @Param('backupId') backupId: string, 
+    @Param('backupId') backupId: string,
     @Res() res: Response // <--- RIMOSSO passthrough: true
   ) {
     const backup = await this.jobsService.getBackup(backupId);
