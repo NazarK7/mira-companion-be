@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from 'prisma/prisma.module';
+
 import { CustomersModule } from './customers/customers.module';
 import { PlantsModule } from './plants/plants.module';
 import { StationsModule } from './stations/stations.module';
@@ -10,12 +10,13 @@ import { JobsModule } from './jobs/jobs.module';
 import { CalibrationsModule } from './calibrations/calibrations.module';
 import { MaintenanceEventsModule } from './maintenance-events/maintenance-events.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [
     MulterModule.register({
       limits: {
-        fileSize: 3 * 1024 * 1024 * 1024, 
+        fileSize: 4 * 1024 * 1024 * 1024, 
       },
     }),
     StorageModule,

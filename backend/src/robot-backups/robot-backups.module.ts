@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { RobotBackupsController } from './robot-backups.controller';
 import { RobotBackupsService } from './robot-backups.service';
-import { StorageModule } from 'src/storage/storage.module';
+import { StorageModule } from '../storage/storage.module';
+
 
 @Module({
   imports: [StorageModule],

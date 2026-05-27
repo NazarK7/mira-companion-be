@@ -172,6 +172,7 @@ model Job {
   visionToolSlot Int?
 
   backups        JobBackup[]
+  testImages     JobTestImage[] 
 
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -192,23 +193,20 @@ model JobBackup {
   notes           String?
   createdBy       String?
 
-  testImages      JobTestImage[]
-
   createdAt       DateTime       @default(now())
 }
 
 model JobTestImage {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  backupId   String    @db.Uuid
-  backup     JobBackup @relation(fields: [backupId], references: [id], onDelete: Cascade)
+  jobId      String    @db.Uuid     // <-- NUOVO: Riferimento al Job
+  job        Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
   
-  filename   String
+  fileName   String    // <-- Rinominato per coerenza con i backup
   filePath   String?
   fileSize   BigInt?
-  capturedAt DateTime?
   notes      String?
-
-  createdAt  DateTime  @default(now())
+  
+  createdAt  DateTime  @default(now()) // Giorno e ora esatta
 }
 
 model RobotBackupRecord {
